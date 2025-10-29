@@ -1,0 +1,32 @@
+# Wirtualne środowisko
+venv_tf/
+venv_tf/*
+
+# Pythona
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Pliki tymczasowe
+*.swp
+*.swo
+*.tmp
+*.log
+
+# IDE / edytory
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# System
+.DS_Store
+Thumbs.db
+
+# Model / dane duże (opcjonalnie)
+*.h5
+*.ckpt
+*.png
+*.jpg
+
