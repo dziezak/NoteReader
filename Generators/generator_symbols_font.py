@@ -1,7 +1,10 @@
 
 # generate_symbols_font.py
 import os
-from PIL import Image, ImageFont
+from PIL import Image, ImageFont, ImageFilter, ImageOps, ImageDraw, ImageChops
+import random
+import numpy as np
+
 
 OUT_DIR = "data_symbols_font"
 FONT_PATH = os.path.join(os.path.dirname(__file__), "Bravura.otf")
@@ -23,26 +26,25 @@ SYMBOLS = {
 }
 
 def generate_symbol(symbol_name, code, idx, font):
-    from PIL import Image
-
+    # Tworzymy pusty obrazek grayscale (czarny symbol na białym tle)
     img = Image.new("L", IMG_SIZE, 255)
+    draw = ImageDraw.Draw(img)
 
-    # Pobierz maskę symbolu z fontu
-    mask_raw = font.getmask(code)
+    # Obliczamy wielkość symbolu
+    bbox = draw.textbbox((0, 0), code, font=font)
+    w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
 
-    # Konwertuj ImagingCore → obraz PIL
-    mask = Image.frombuffer("L", mask_raw.size, bytes(mask_raw), "raw", "L", 0, 1)
+    # Wyśrodkowanie symbolu
+    x = (IMG_SIZE[0] - w) / 2
+    y = (IMG_SIZE[1] - h) / 2
 
-    # Wycentruj
-    x = (IMG_SIZE[0] - mask.size[0]) // 2
-    y = (IMG_SIZE[1] - mask.size[1]) // 2
-    box = (x, y, x + mask.size[0], y + mask.size[1])
+    # Rysujemy symbol
+    draw.text((x, y), code, font=font, fill=0)
 
-    # Wklej symbol jako czarny
-    img.paste(0, box, mask)
+    # Zapisujemy obrazek
+    out_path = os.path.join(OUT_DIR, symbol_name, f"{symbol_name}_{idx}.png")
+    img.save(out_path)
 
-    # Zapisz do pliku
-    img.save(os.path.join(OUT_DIR, symbol_name, f"{symbol_name}_{idx}.png"))
 
 
 
