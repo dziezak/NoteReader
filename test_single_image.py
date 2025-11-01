@@ -10,7 +10,7 @@ import os
 # -------------------------
 IMG_SIZE = (128, 128)
 MODEL_PATH = "models/best_light_cnn.keras"  # ścieżka do zapisanego modelu
-TEST_IMAGE_PATH = "test_półnuta.png"                     # ścieżka do obrazka do przetestowania
+TEST_IMAGE_PATH = "test_ćwierćnuta.png"                     # ścieżka do obrazka do przetestowania
 
 # -------------------------
 # 🧠 Wczytanie modelu
