@@ -1,74 +1,64 @@
 import cv2
 import os
+import numpy as np
 
-# ----------------------------
-# 📁 Konfiguracja folderów
-# ----------------------------
-INPUT_FOLDER = "generated_sheets"
+INPUT_FOLDER = "staff_removed"   # ⬅️ WAŻNE
 OUTPUT_FOLDER = "to_check"
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-# ----------------------------
-# ⚙️ Parametry segmentacji
-# ----------------------------
-MIN_WIDTH = 5       # minimalna szerokość konturu
-MIN_HEIGHT = 5      # minimalna wysokość konturu
-THRESHOLD_VALUE = 200  # próg binarnego progowania (0–255)
+MIN_WIDTH = 8
+MIN_HEIGHT = 8
 
-# ----------------------------
-# 🧩 Przetwarzanie każdego obrazu
-# ----------------------------
-for file in os.listdir(INPUT_FOLDER):
-    if not file.lower().endswith(".png"):
+def sort_contours_left_to_right(contours):
+    boxes = [cv2.boundingRect(c) for c in contours]
+    idxs = sorted(range(len(boxes)), key=lambda i: boxes[i][0])
+    return [contours[i] for i in idxs], [boxes[i] for i in idxs]
+
+for fname in os.listdir(INPUT_FOLDER):
+    if not fname.lower().endswith(".png"):
         continue
 
-    path = os.path.join(INPUT_FOLDER, file)
-    print(f"\n📄 Przetwarzanie: {path}")
+    path = os.path.join(INPUT_FOLDER, fname)
+    print(f"\n📄 Segmentacja: {fname}")
+
     img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
     if img is None:
-        print(f"❌ Nie udało się wczytać obrazu: {path}")
         continue
 
-    # ----------------------------
-    # 🔲 Progowanie (inwersja)
-    # ----------------------------
-    _, thresh = cv2.threshold(img, THRESHOLD_VALUE, 255, cv2.THRESH_BINARY_INV)
-    debug_thresh_path = os.path.join(OUTPUT_FOLDER, f"debug_thresh_{file}")
-    cv2.imwrite(debug_thresh_path, thresh)
-    print(f"💾 Zapisano obraz progowany: {debug_thresh_path}")
+    # Binaryzacja
+    thresh = cv2.adaptiveThreshold(
+        img, 255,
+        cv2.ADAPTIVE_THRESH_MEAN_C,
+        cv2.THRESH_BINARY_INV,
+        35, 10
+    )
 
-    # ----------------------------
-    # 🔍 Znajdź kontury
-    # ----------------------------
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    print(f"🔍 Znaleziono konturów: {len(contours)}")
+    # Morfologia
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+    morph = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=1)
 
-    # Kopia oryginalnego obrazu do wizualizacji
+    contours, _ = cv2.findContours(morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, boxes = sort_contours_left_to_right(contours)
+
     img_color = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-    count = 0
+    saved = 0
 
-    for i, contour in enumerate(contours):
-        x, y, w, h = cv2.boundingRect(contour)
-        print(f"➡️ Kontur {i}: x={x}, y={y}, w={w}, h={h}")
+    for cnt, (x,y,w,h) in zip(contours, boxes):
+        if w < MIN_WIDTH or h < MIN_HEIGHT:
+            continue
 
-        # ----------------------------
-        # ✂️ Wycinanie nut
-        # ----------------------------
-        if w > MIN_WIDTH and h > MIN_HEIGHT:
-            roi = img[y:y+h, x:x+w]
-            out_name = f"{os.path.splitext(file)[0]}_{count}.png"
-            out_path = os.path.join(OUTPUT_FOLDER, out_name)
-            cv2.imwrite(out_path, roi)
-            cv2.rectangle(img_color, (x, y), (x + w, y + h), (0, 255, 0), 1)
-            count += 1
+        pad = 4
+        x0, y0 = max(0,x-pad), max(0,y-pad)
+        x1, y1 = min(img.shape[1], x+w+pad), min(img.shape[0], y+h+pad)
 
-    # ----------------------------
-    # 💾 Zapisz obraz z ramkami
-    # ----------------------------
-    debug_boxes_path = os.path.join(OUTPUT_FOLDER, f"debug_boxes_{file}")
-    cv2.imwrite(debug_boxes_path, img_color)
-    print(f"💾 Zapisano obraz z ramkami: {debug_boxes_path}")
+        roi = img[y0:y1, x0:x1]
+        out_name = f"{os.path.splitext(fname)[0]}_sym_{saved}.png"
+        cv2.imwrite(os.path.join(OUTPUT_FOLDER, out_name), roi)
 
-    print(f"✅ Gotowe — wycięto {count} symboli.")
+        cv2.rectangle(img_color, (x0,y0), (x1,y1), (0,255,0), 1)
+        saved += 1
 
-print("\n🎉 Zakończono segmentację wszystkich obrazów.")
+    cv2.imwrite(os.path.join(OUTPUT_FOLDER, f"debug_boxes_{fname}"), img_color)
+    print(f"✅ Wycięto symboli: {saved}")
+
+print("\n🎉 Segmentacja zakończona.")

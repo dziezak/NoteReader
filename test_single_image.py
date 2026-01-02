@@ -9,17 +9,17 @@ import os
 # 🔧 Ustawienia
 # -------------------------
 IMG_SIZE = (128, 128)
-MODEL_PATH = "models/best_light_cnn.keras"  # ścieżka do zapisanego modelu
-TEST_IMAGE_PATH = "test_ćwierćnuta.png"                     # ścieżka do obrazka do przetestowania
+MODEL_PATH = "models/best_light_cnn.keras"  
+TEST_IMAGE_PATH = "test.png"     
 
 # -------------------------
 # 🧠 Wczytanie modelu
 # -------------------------
 if not os.path.exists(MODEL_PATH):
-    raise FileNotFoundError(f"❌ Nie znaleziono modelu pod ścieżką: {MODEL_PATH}")
+    raise FileNotFoundError(f"Nie znaleziono modelu pod ścieżką: {MODEL_PATH}")
 
 model = load_model(MODEL_PATH)
-print("✅ Model wczytany pomyślnie.")
+print("Model wczytany pomyślnie.")
 
 # Jeśli chcesz znać nazwy klas – upewnij się, że są takie same jak w treningu:
 class_names = [
@@ -39,7 +39,7 @@ class_names = [
 # 🧩 Wczytanie i przygotowanie obrazka
 # -------------------------
 if not os.path.exists(TEST_IMAGE_PATH):
-    raise FileNotFoundError(f"❌ Nie znaleziono pliku obrazu: {TEST_IMAGE_PATH}")
+    raise FileNotFoundError(f"Nie znaleziono pliku obrazu: {TEST_IMAGE_PATH}")
 
 print(f"\n🧩 Testuję pojedynczy obrazek: {TEST_IMAGE_PATH}")
 
@@ -61,7 +61,7 @@ predictions = model.predict(img_array)
 predicted_index = np.argmax(predictions)
 predicted_label = class_names[predicted_index]
 
-print(f"\n➡️ Obrazek '{os.path.basename(TEST_IMAGE_PATH)}' został sklasyfikowany jako: {predicted_label}")
+print(f"\nObrazek '{os.path.basename(TEST_IMAGE_PATH)}' został sklasyfikowany jako: {predicted_label}")
 print("🔢 Wyniki predykcji (softmax):", np.round(predictions[0], 3))
 
 # -------------------------
