@@ -1,0 +1,165 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+
+\title{Rozpoznawanie symboli muzycznych przy użyciu konwolucyjnych sieci neuronowych}
+\author{Kornel Dzieża}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+%-------------------------------------------------
+\section{Wstęp}
+Celem projektu było stworzenie systemu rozpoznawania symboli muzycznych (nut, pauz oraz kluczy muzycznych) na obrazach o rozmiarze 128x128 pikseli. Obrazki te stanowią wycinki większych partytur muzycznych zawierających pięciolinię. Projekt ten jest częścią szerszego zagadnienia, jakim jest automatyczny odczyt zapisu nutowego z zeskanowanych materiałów muzycznych.
+
+Drugim, równie istotnym celem projektu było praktyczne zapoznanie się z zagadnieniami uczenia maszynowego oraz głębokiego uczenia. W trakcie realizacji projektu autor zdobył doświadczenie w projektowaniu, trenowaniu oraz analizie konwolucyjnych sieci neuronowych (CNN). Wiedza zdobyta podczas wcześniejszych eksperymentów z rozpoznawaniem cyfr pisanych ręcznie została wykorzystana jako punkt wyjścia do pracy nad symbolami muzycznymi.
+
+Na początkowym etapie projektu podjęto próbę zastosowania klasycznej architektury \textbf{AlexNet}. Model ten jednak okazał się nieodpowiedni do pracy z małymi obrazami oraz ograniczoną liczbą danych treningowych. W rezultacie zaprojektowano uproszczoną architekturę \textbf{AlexNet-light}, lepiej dopasowaną do charakteru problemu.
+
+%-------------------------------------------------
+\section{Opis teoretyczny rozwiązania}
+
+\subsection{Konwolucyjne sieci neuronowe}
+Jednym z pierwszych problemów napotkanych podczas realizacji projektu był brak odpowiedniego zbioru danych zawierającego pojedyncze symbole muzyczne. W celu jego rozwiązania wykorzystano istniejącą czcionkę symboli muzycznych, na podstawie której wygenerowano syntetyczne dane uczące. Obrazy różniły się położeniem symboli, niewielkimi przesunięciami oraz losowymi artefaktami.
+
+Konwolucyjne sieci neuronowe (CNN) są powszechnie stosowane w zadaniach analizy obrazu. Składają się z warstw konwolucyjnych odpowiedzialnych za ekstrakcję cech, warstw normalizacji, warstw redukujących rozmiar danych (pooling) oraz warstw gęstych realizujących klasyfikację. Ich struktura pozwala na wykrywanie cech niezależnie od położenia obiektu w obrazie.
+
+\subsection{Architektura AlexNet-light}
+
+Architektura AlexNet-light została zaprojektowana jako odpowiedź na ograniczenia klasycznego modelu AlexNet w kontekście analizy niewielkich obrazów symboli muzycznych. Oryginalny AlexNet został stworzony z myślą o dużych obrazach (224x224 piksele) oraz bardzo rozbudowanych zbiorach danych. W przypadku niniejszego projektu zastosowanie tak dużej sieci prowadziło do nadmiernego przeuczenia oraz niestabilnego procesu trenowania.
+
+Model AlexNet-light zachowuje główne założenia architektury AlexNet, takie jak hierarchiczna ekstrakcja cech oraz stopniowe zwiększanie liczby filtrów konwolucyjnych, jednak w znacznie uproszczonej i dostosowanej do problemu formie.
+
+\subsubsection{Wejście i wstępne przetwarzanie danych}
+Na wejściu sieci znajduje się obraz w skali szarości o rozmiarze 128x128 pikseli. Wybór skali szarości pozwala na ograniczenie liczby parametrów oraz skupienie się na kształcie symboli, który jest kluczowy w rozpoznawaniu zapisu nutowego.
+
+Przed właściwym przetwarzaniem obrazu stosowana jest augmentacja danych, obejmująca niewielkie rotacje, translacje, zmiany skali oraz kontrastu. Zabieg ten pozwala na zwiększenie różnorodności danych treningowych oraz poprawę odporności modelu na niewielkie deformacje symboli, które mogą występować w rzeczywistych skanach partytur.
+
+\subsubsection{Bloki konwolucyjne}
+Główna część modelu składa się z trzech bloków konwolucyjnych. Każdy blok zawiera następujące elementy:
+\begin{itemize}
+    \item warstwę konwolucyjną (\texttt{Conv2D}) z funkcją aktywacji ReLU,
+    \item normalizację wsadową (\texttt{BatchNormalization}),
+    \item warstwę redukującą rozmiar danych (\texttt{MaxPooling}),
+    \item warstwę regularyzującą (\texttt{Dropout}).
+\end{itemize}
+
+W kolejnych blokach liczba filtrów konwolucyjnych wzrasta (32, 64 oraz 128), co umożliwia modelowi przechodzenie od wykrywania prostych cech (takich jak krawędzie i linie) do bardziej złożonych struktur odpowiadających całym symbolom muzycznym.
+
+Zastosowanie normalizacji wsadowej stabilizuje proces uczenia oraz przyspiesza zbieżność modelu. Warstwy \texttt{Dropout} redukują ryzyko przeuczenia poprzez losowe wyłączanie części neuronów w trakcie treningu.
+
+\subsubsection{Warstwy gęste i klasyfikacja}
+Po zakończeniu ekstrakcji cech mapa aktywacji jest spłaszczana przy użyciu warstwy \texttt{Flatten}, a następnie przekazywana do warstw gęstych. Pierwsza warstwa gęsta składa się z 256 neuronów z funkcją aktywacji ReLU i pełni rolę klasyfikatora wysokiego poziomu, łącząc wykryte cechy w spójną reprezentację symbolu.
+
+Ostatnia warstwa gęsta wykorzystuje funkcję aktywacji \texttt{softmax}, która zwraca rozkład prawdopodobieństwa przynależności obrazu do jednej z klas symboli muzycznych. Klasa o najwyższym prawdopodobieństwie jest traktowana jako końcowa predykcja modelu.
+
+\subsubsection{Zalety zaproponowanej architektury}
+Architektura AlexNet-light charakteryzuje się korzystnym kompromisem pomiędzy złożonością modelu a jego skutecznością. Zmniejszona liczba parametrów pozwala na stabilne trenowanie nawet przy ograniczonej liczbie danych, jednocześnie zachowując wysoką skuteczność klasyfikacji.
+
+Dzięki modularnej budowie model może być łatwo rozszerzany lub modyfikowany, na przykład poprzez dodanie kolejnych bloków konwolucyjnych lub zmianę liczby klas. Architektura ta stanowi solidną podstawę do dalszych prac nad automatycznym rozpoznawaniem zapisu nutowego.
+
+
+\begin{verbatim}
+def build_light_cnn(input_shape=(128,128,1), num_classes=10):
+    model = models.Sequential([
+        layers.Input(shape=input_shape),
+        data_augmentation,
+        layers.Conv2D(32,(3,3),activation='relu',padding='same'),
+        layers.BatchNormalization(),
+        layers.MaxPooling2D((2,2)),
+        layers.Dropout(0.25),
+        layers.Conv2D(64,(3,3),activation='relu',padding='same'),
+        layers.BatchNormalization(),
+        layers.MaxPooling2D((2,2)),
+        layers.Dropout(0.3),
+        layers.Conv2D(128,(3,3),activation='relu',padding='same'),
+        layers.BatchNormalization(),
+        layers.MaxPooling2D((2,2)),
+        layers.Dropout(0.4),
+        layers.Flatten(),
+        layers.Dense(256,activation='relu'),
+        layers.BatchNormalization(),
+        layers.Dropout(0.5),
+        layers.Dense(num_classes,activation='softmax')
+    ])
+    return model
+\end{verbatim}
+
+%-------------------------------------------------
+\section{Problemy z pięciolinią}
+W kolejnym etapie projektu podjęto próbę bezpośredniego rozpoznawania symboli wyciętych z obrazów zawierających pięciolinię. Podejście to okazało się nieskuteczne, ponieważ linie pięciolinii znacząco zaburzały proces klasyfikacji.
+
+Po analizie problemu ustalono, że konieczne są dwa dodatkowe etapy:
+\begin{enumerate}
+    \item wykrycie i usunięcie linii pięciolinii,
+    \item klasyfikacja symboli na obrazach pozbawionych linii.
+\end{enumerate}
+
+Usuwanie pięciolinii realizowano przy użyciu operacji morfologicznych, co prowadziło do powstawania charakterystycznych artefaktów.
+
+%-------------------------------------------------
+\section{Rozszerzenie zbioru danych}
+Po zidentyfikowaniu źródła problemu zdecydowano się na stworzenie nowego zbioru danych. Zawierał on symbole muzyczne z artefaktami imitującymi efekty czyszczenia pięciolinii. Dane te generowano w analogiczny sposób jak pierwotny zbiór, celowo wprowadzając zakłócenia strukturalne.
+
+Do trenowania wykorzystano tę samą architekturę AlexNet-light, zmieniając jedynie zbiór danych treningowych.
+
+%-------------------------------------------------
+\section{Proces trenowania i wyniki}
+
+Dane podzielono na zbiór treningowy (80\%) oraz walidacyjny (20\%). Model trenowano przez maksymalnie 50 epok z użyciem mechanizmów \texttt{EarlyStopping} oraz \texttt{ModelCheckpoint}.
+
+\subsection{Wyniki dla danych bez artefaktów}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{train_val_accuracy.png}
+    \caption{Dokładność modelu trenowanego na czystych danych syntetycznych.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{train_val_loss.png}
+    \caption{Strata modelu trenowanego na czystych danych syntetycznych.}
+\end{figure}
+
+\subsection{Wyniki dla danych z artefaktami (blurry)}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{train_val_accuracy_blurry.png}
+    \caption{Dokładność modelu trenowanego na danych z artefaktami po usuwaniu pięciolinii.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{train_val_loss_blurry.png}
+    \caption{Strata modelu trenowanego na danych z artefaktami po usuwaniu pięciolinii.}
+\end{figure}
+
+%-------------------------------------------------
+\section{Eksperymenty i obserwacje}
+\begin{itemize}
+    \item Model trenowany na danych z artefaktami wykazuje lepszą generalizację.
+    \item Augmentacja danych zwiększa odporność na przesunięcia i zniekształcenia.
+    \item Najczęściej mylone klasy to pauzy o zbliżonym kształcie.
+\end{itemize}
+
+%-------------------------------------------------
+\section{Ograniczenia rozwiązania}
+\begin{enumerate}
+    \item Dokładność modelu nie osiąga 100\%.
+    \item Silne rozmycie obrazu prowadzi do spadku skuteczności.
+    \item Bardzo podobne wizualnie symbole są trudne do rozróżnienia.
+\end{enumerate}
+
+%-------------------------------------------------
+\section{Wnioski}
+Projekt potwierdził skuteczność konwolucyjnych sieci neuronowych w rozpoznawaniu symboli muzycznych. Kluczowym elementem okazało się odpowiednie przygotowanie danych, w szczególności uwzględnienie artefaktów występujących po usuwaniu pięciolinii. Zaproponowane rozwiązanie stanowi solidną podstawę do dalszego rozwoju systemów automatycznego odczytu zapisu nutowego.
+
+\end{document}

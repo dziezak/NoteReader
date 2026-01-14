@@ -6,9 +6,10 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 IMG_SIZE = (128, 128)
 BATCH_SIZE = 32
-DATA_DIR = "data_symbols_font"
+DATA_DIR = "data_symbols_font_blury"
 EPOCHS = 50
-MODEL_PATH = "models/light_cnn_notes_final.keras"
+#MODEL_PATH = "models/light_cnn_notes_final.keras"
+MODEL_PATH = "models/blurry_model.keras"
 
 # -------------------------
 # 🔹 Augmentacja danych
