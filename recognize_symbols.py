@@ -8,7 +8,7 @@ from tensorflow.keras.models import load_model
 # 🔧 Ustawienia
 # -------------------------
 IMG_SIZE = (128, 128)
-MODEL_PATH = "models/best_light_cnn.keras"
+MODEL_PATH = "models/light_cnn_notes_final.keras"
 INPUT_FOLDER = "to_check"
 RESIZED_FOLDER = "resized_after_staff_removed"
 OUTPUT_CSV = "recognized_symbols.csv"

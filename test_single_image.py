@@ -9,8 +9,10 @@ import os
 # 🔧 Ustawienia
 # -------------------------
 IMG_SIZE = (128, 128)
-MODEL_PATH = "models/best_light_cnn.keras"  
-TEST_IMAGE_PATH = "test.png"     
+MODEL_PATH = "models/light_cnn_notes_final.keras"  
+#MODEL_PATH = "models/best_light_cnn.keras"  
+TEST_IMAGE_PATH = "sheet_4_sym_5.png" # ok 
+
 
 # -------------------------
 # 🧠 Wczytanie modelu
@@ -28,11 +30,11 @@ class_names = [
     "nuta",
     "pauza_cwierc",
     "pauza_nuta",
-    "pauza_pólnuta",
+    "pauza_polnuta",
     "pauza_usemka",
-    "półnuta",
+    "polnuta",
     "usemka",
-    "ćwierćnuta"
+    "cwiercnuta"
 ]
 
 # -------------------------
