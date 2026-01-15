@@ -141,6 +141,43 @@ Dane podzielono na zbiór treningowy (80\%) oraz walidacyjny (20\%). Model treno
     \includegraphics[width=0.85\textwidth]{train_val_loss_blurry.png}
     \caption{Strata modelu trenowanego na danych z artefaktami po usuwaniu pięciolinii.}
 \end{figure}
+%-------------------------------------------------
+\section{Jakościowa ocena działania modelu}
+
+Oprócz klasycznej analizy metryk ilościowych, takich jak dokładność i strata, istotnym elementem oceny systemu rozpoznawania obrazów jest również analiza jakościowa wyników predykcji. W tym celu opracowano dedykowany skrypt testowy, umożliwiający wizualną ocenę działania wytrenowanych modeli konwolucyjnych.
+
+Skrypt pozwala na wybór jednej z trzech wersji modelu:
+\begin{itemize}
+    \item \textbf{CLEAN} – model trenowany na czystych danych syntetycznych,
+    \item \textbf{FINAL} – model trenowany na danych z augmentacją,
+    \item \textbf{BLURRY} – model trenowany na danych z artefaktami imitującymi skutki usuwania pięciolinii.
+\end{itemize}
+
+Po wyborze wersji modelu losowany jest jeden obraz testowy z każdej klasy symboli muzycznych. Następnie obrazy te są jednocześnie klasyfikowane przez model, a wyniki prezentowane są w formie jednej zbiorczej wizualizacji.
+
+Każdy z wyświetlonych obrazów opatrzony jest informacją o klasie rzeczywistej (Ground Truth) oraz klasie przewidzianej przez model (Prediction). Kolor opisu predykcji wskazuje poprawność klasyfikacji: kolor zielony oznacza poprawną predykcję, natomiast kolor czerwony sygnalizuje błąd klasyfikacji. Takie podejście umożliwia szybką identyfikację klas problematycznych oraz ocenę, które symbole są dla modelu najbardziej mylące.
+
+\subsection{Wizualizacja wyników testów}
+
+Na rysunkach \ref{fig:test_final} oraz \ref{fig:test_blurry} przedstawiono przykładowe wyniki jakościowej ewaluacji dwóch wersji modelu: FINAL oraz BLURRY. Każda wizualizacja zawiera po jednym losowo wybranym przykładzie z każdej klasy, co pozwala na bezpośrednie porównanie skuteczności klasyfikacji dla całego zestawu symboli.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{test_modelu_cnn_wersja_final.png}
+    \caption{Wyniki jakościowej oceny modelu CNN – wersja FINAL (dane czyste z augmentacją).}
+    \label{fig:test_final}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{test_modelu_cnn_wersja_blurry.png}
+    \caption{Wyniki jakościowej oceny modelu CNN – wersja BLURRY (dane z artefaktami po usuwaniu pięciolinii).}
+    \label{fig:test_blurry}
+\end{figure}
+
+Na podstawie przedstawionych wyników można zaobserwować, że model trenowany na danych z artefaktami (BLURRY) wykazuje większą odporność na nieregularności kształtów symboli oraz lepiej radzi sobie z przypadkami zniekształconymi. Wersja FINAL osiąga bardzo dobre wyniki na danych czystych, jednak w niektórych przypadkach jest bardziej podatna na błędy wynikające z obecności artefaktów strukturalnych.
+Można też tutaj zaobserwować wcześniej wspomniany problem podobności pauzy półnutowaej i całonutowej. Jako, że wyglądają tak samo bez pięciolini jeżeli w pryszłości byśmy implemenowali daje interpretację tych nut to trzebaby odpowiednio policzyć długości nut, pauz w takcie i odpowiednio dostosować symbol lub przypatrywać się lepiej bliskości liń z pięciolinii.
+
 
 %-------------------------------------------------
 \section{Eksperymenty i obserwacje}
