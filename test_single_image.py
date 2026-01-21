@@ -9,10 +9,10 @@ import os
 # 🔧 Ustawienia
 # -------------------------
 IMG_SIZE = (128, 128)
-MODEL_PATH = "models/light_cnn_notes_final.keras"  
+MODEL_PATH = "models/light_cnn_notes_final.keras" # najlepszy model
 #MODEL_PATH = "models/best_light_cnn.keras"  
-TEST_IMAGE_PATH = "sheet_4_sym_5.png" # ok 
-
+TEST_IMAGE_PATH = "test_cwiercnuta.png" 
+DATA_DIR = "data_symbols_font"
 
 # -------------------------
 # 🧠 Wczytanie modelu
@@ -24,18 +24,11 @@ model = load_model(MODEL_PATH)
 print("Model wczytany pomyślnie.")
 
 # Jeśli chcesz znać nazwy klas – upewnij się, że są takie same jak w treningu:
-class_names = [
-    "klucz_basowy",
-    "klucz_wiolinowy",
-    "nuta",
-    "pauza_cwierc",
-    "pauza_nuta",
-    "pauza_polnuta",
-    "pauza_usemka",
-    "polnuta",
-    "usemka",
-    "cwiercnuta"
-]
+class_names = sorted([
+    d for d in os.listdir(DATA_DIR)
+    if os.path.isdir(os.path.join(DATA_DIR, d))
+])
+
 
 # -------------------------
 # 🧩 Wczytanie i przygotowanie obrazka
